@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="2style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>click-the-circle</title>
+</head>
+<body>
+  <a href="main.html" class="top-button">Back to Hub</a>
+  <div id="game-area">
+    <div id="score">Score: 0</div>
+  </div>
+
+  <script>
+    const gameArea = document.getElementById('game-area');
+    const scoreDisplay = document.getElementById('score');
+    let score = 0;
+    let moveTimer;
+
+    function createCircle() {
+      const circle = document.createElement('div');
+      circle.classList.add('circle');
+      positionCircle(circle);
+
+      // Move the circle every 2 seconds
+      moveTimer = setInterval(() => {
+        positionCircle(circle);
+      }, 1000);
+
+      circle.addEventListener('click', () => {
+        score++;
+        scoreDisplay.textContent = `Score: ${score}`;
+        clearInterval(moveTimer);
+        circle.remove();
+        createCircle();
+      });
+
+      gameArea.appendChild(circle);
+    }
+
+    function positionCircle(circle) {
+      const x = Math.random() * (window.innerWidth - 60);
+      const y = Math.random() * (window.innerHeight - 60);
+      circle.style.left = `${x}px`;
+      circle.style.top = `${y}px`;
+    }
+
+    createCircle();
+  </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="6style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whack-a-Mole</title>
+</head>
+<body>
+    <a href="main.html" class="top-button">Back to Hub</a>
+  <h1>Whack-a-Mole</h1>
+  <div class="scoreboard">
+    Score: <span id="score">0</span> | Time Left: <span id="time">30</span>s
+  </div>
+  <div class="grid" id="grid"></div>
+  <div id="end-message"></div>
+
+  <script>
+    const grid = document.getElementById('grid');
+    const scoreDisplay = document.getElementById('score');
+    const timeDisplay = document.getElementById('time');
+    const endMessage = document.getElementById('end-message');
+
+    let score = 0;
+    let timeLeft = 30;
+    let activeIndex = -1;
+    let gameInterval, moleInterval;
+
+    function createGrid() {
+      for (let i = 0; i < 9; i++) {
+        const hole = document.createElement('div');
+        hole.classList.add('hole');
+        hole.addEventListener('click', () => {
+          if (i === activeIndex) {
+            score++;
+            scoreDisplay.textContent = score;
+            hideMole();
+          }
+        });
+        grid.appendChild(hole);
+      }
+    }
+
+    function showMole() {
+      hideMole();
+      const holes = document.querySelectorAll('.hole');
+      activeIndex = Math.floor(Math.random() * holes.length);
+      holes[activeIndex].classList.add('active');
+      holes[activeIndex].textContent = '🐹';
+    }
+
+    function hideMole() {
+      const holes = document.querySelectorAll('.hole');
+      holes.forEach(h => {
+        h.classList.remove('active');
+        h.textContent = '';
+      });
+      activeIndex = -1;
+    }
+
+    function startGame() {
+      createGrid();
+      moleInterval = setInterval(showMole, 750);
+      gameInterval = setInterval(() => {
+        timeLeft--;
+        timeDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(gameInterval);
+          clearInterval(moleInterval);
+          hideMole();
+          endMessage.textContent = `🎉 Time's up! Final Score: ${score}`;
+          setTimeout(() => location.reload(), 4000);
+        }
+      }, 1000);
+    }
+
+    startGame();
+  </script>
+</body>
+</html>

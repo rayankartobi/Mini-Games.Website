@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="7style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reaction Time</title>
+</head>
+<body>
+    <a href="main.html" class="top-button">Back to Hub</a>
+  <h1>Reaction Time</h1>
+  <div id="box">Wait for green...</div>
+  <div id="message"></div>
+
+  <script>
+    const box = document.getElementById('box');
+    const message = document.getElementById('message');
+
+    let startTime;
+    let isGreen = false;
+    let timeout;
+
+    function startGame() {
+      message.textContent = '';
+      box.style.backgroundColor = '#444';
+      box.textContent = 'Wait for green...';
+      isGreen = false;
+
+      const delay = Math.floor(Math.random() * 4000) + 2000;
+
+      timeout = setTimeout(() => {
+        isGreen = true;
+        startTime = new Date().getTime();
+        box.style.backgroundColor = '#27ae60';
+        box.textContent = 'CLICK!';
+      }, delay);
+    }
+
+    box.addEventListener('click', () => {
+      if (isGreen) {
+        const endTime = new Date().getTime();
+        const reactionTime = endTime - startTime;
+        message.textContent = `✅ Your reaction time: ${reactionTime} ms`;
+        box.textContent = 'Nice!';
+        setTimeout(startGame, 2000);
+      } else {
+        clearTimeout(timeout);
+        box.textContent = '⛔ Too Soon!';
+        message.textContent = 'Wait for the green color!';
+        setTimeout(startGame, 2000);
+      }
+    });
+
+    startGame();
+  </script>
+</body>
+</html>

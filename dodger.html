@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="8style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodger Game</title>
+</head>
+<body>
+    <a href="main.html" class="top-button">Back to Hub</a>
+  <h1>Dodger Game</h1>
+  <div id="touch-controls">
+  <button onclick="movePlayer('left')">⬅️</button>
+  <button onclick="movePlayer('right')">➡️</button>
+</div>
+  <button id="toggle-btn">Stop</button>
+  <div id="game">
+    <div id="player"></div>
+  </div>
+  <div id="message"></div>
+
+  <script>
+    const game = document.getElementById('game');
+    const player = document.getElementById('player');
+    const message = document.getElementById('message');
+    const toggleBtn = document.getElementById('toggle-btn');
+
+    let playerX = 125;
+    let gameInterval;
+    let speed = 3;
+    let isRunning = true;
+
+    function movePlayer(direction) {
+      if (direction === 'left' && playerX > 0) {
+        playerX -= 25;
+      } else if (direction === 'right' && playerX < 250) {
+        playerX += 25;
+      }
+      player.style.left = playerX + 'px';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') movePlayer('left');
+      else if (e.key === 'ArrowRight') movePlayer('right');
+    });
+
+    function createBlock() {
+      const block = document.createElement('div');
+      block.classList.add('block');
+      const positions = [0, 75, 150, 225];
+      const pos = positions[Math.floor(Math.random() * positions.length)];
+      block.style.left = pos + 'px';
+      block.style.top = '0px';
+      game.appendChild(block);
+
+      const moveDown = setInterval(() => {
+        let top = parseInt(block.style.top);
+        if (top >= 450) {
+          clearInterval(moveDown);
+          if (game.contains(block)) game.removeChild(block);
+        } else {
+          block.style.top = (top + speed) + 'px';
+          checkCollision(block, moveDown);
+        }
+      }, 20);
+    }
+
+    function checkCollision(block, moveDown) {
+      const blockRect = block.getBoundingClientRect();
+      const playerRect = player.getBoundingClientRect();
+
+      if (
+        blockRect.bottom > playerRect.top &&
+        blockRect.top < playerRect.bottom &&
+        blockRect.left < playerRect.right &&
+        blockRect.right > playerRect.left
+      ) {
+        clearInterval(gameInterval);
+        clearInterval(moveDown);
+        endGame();
+      }
+    }
+
+    function endGame() {
+      document.querySelectorAll('.block').forEach(b => b.remove());
+      message.textContent = '💥 Game Over! Restarting...';
+      toggleBtn.disabled = true;
+      setTimeout(() => location.reload(), 3000);
+    }
+
+    function startGame() {
+      gameInterval = setInterval(() => {
+        if (isRunning) createBlock();
+      }, 800);
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      if (isRunning) {
+        isRunning = false;
+        toggleBtn.textContent = 'Start';
+      } else {
+        isRunning = true;
+        toggleBtn.textContent = 'Stop';
+      }
+    });
+
+    startGame();
+  </script>
+</body>
+</html>

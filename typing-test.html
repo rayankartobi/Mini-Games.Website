@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="5style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <a href="main.html" class="top-button">Back to Hub</a>
+  <h1>Typing Speed Test</h1>
+  <div id="quote"></div>
+  <input type="text" id="input" placeholder="Start typing here..." autocomplete="off" />
+  <div id="result"></div>
+
+  <script>
+    const quotes = [
+     "Stay hungry, stay foolish.",
+
+     "Less is more.",
+
+     "Do it with passion.",
+
+     "Dream big, work hard.",
+
+     "Keep moving forward.",
+
+     "Progress, not perfection.",
+
+     "Make it happen.",
+
+     "Think. Do. Repeat.",
+
+     "Believe in yourself.",
+
+    "Start where you are."
+    ];
+
+    let currentQuote = '';
+    let startTime;
+
+    function setNewQuote() {
+      currentQuote = quotes[Math.floor(Math.random() * quotes.length)];
+      document.getElementById('quote').textContent = currentQuote;
+      document.getElementById('input').value = '';
+      document.getElementById('result').textContent = '';
+      startTime = new Date().getTime();
+    }
+
+    document.getElementById('input').addEventListener('input', () => {
+      const inputText = document.getElementById('input').value.trim().toLowerCase();
+      const targetText = currentQuote.trim().toLowerCase();
+
+      if (inputText === targetText) {
+        const endTime = new Date().getTime();
+        const timeTaken = (endTime - startTime) / 1000;
+        const words = currentQuote.split(' ').length;
+        const wpm = Math.round((words / timeTaken) * 60);
+        document.getElementById('result').textContent = `✅ Done in ${timeTaken.toFixed(2)}s — Speed: ${wpm} WPM`;
+        setTimeout(setNewQuote, 3000);
+      }
+    });
+
+    setNewQuote();
+  </script>
+</body>
+</html>
