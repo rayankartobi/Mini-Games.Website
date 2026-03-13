@@ -1,76 +1,296 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="3style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Memory Card Game</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #000428, #004e92);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .top-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #2e3b55;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            z-index: 100;
+        }
+        .top-button:hover { background-color: #3e518a; }
+        h1 { margin-top: 70px; margin-bottom: 10px; }
+
+        /* Difficulty Screen */
+        #difficulty-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        #difficulty-screen p {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            color: #aac4e8;
+        }
+        .diff-btn {
+            width: 220px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 600;
+            color: #fff;
+            transition: transform 0.15s, filter 0.15s;
+        }
+        .diff-btn:hover { transform: scale(1.05); filter: brightness(1.2); }
+        .diff-btn .diff-label { font-size: 1.1rem; }
+        .diff-btn .diff-desc { font-size: 0.75rem; opacity: 0.85; margin-top: 3px; }
+        .btn-easy       { background-color: #27ae60; }
+        .btn-medium     { background-color: #f39c12; }
+        .btn-hard       { background-color: #e74c3c; }
+        .btn-impossible { background: linear-gradient(135deg, #6a0dad, #111); border: 1px solid #9b59b6; }
+
+        /* Game Screen */
+        #game-screen { display: none; flex-direction: column; align-items: center; }
+        .game-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin: 10px 0 20px 0;
+            font-size: 0.95rem;
+            color: #aac4e8;
+        }
+        .game-info span strong { color: #fff; }
+        .difficulty-badge {
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .badge-easy       { background: #27ae60; }
+        .badge-medium     { background: #f39c12; }
+        .badge-hard       { background: #e74c3c; }
+        .badge-impossible { background: linear-gradient(135deg, #6a0dad, #333); border: 1px solid #9b59b6; }
+
+        .grid { display: grid; grid-gap: 12px; margin-top: 10px; }
+        .card {
+            width: 70px;
+            height: 70px;
+            background-color: #1c1c1c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+            user-select: none;
+        }
+        .card.flipped  { background-color: #f39c12; }
+        .card.matched  { background-color: #27ae60; cursor: default; }
+        .card.small    { width: 52px; height: 52px; font-size: 1.3rem; border-radius: 8px; }
+
+        .restart-btn {
+            margin-top: 20px;
+            padding: 10px 25px;
+            background: #2e3b55;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: 'Segoe UI', sans-serif;
+            transition: background 0.2s;
+        }
+        .restart-btn:hover { background: #3e518a; }
+
+        @media (max-width: 420px) {
+            .card { width: 58px; height: 58px; font-size: 1.5rem; }
+            .card.small { width: 44px; height: 44px; font-size: 1.1rem; }
+        }
+    </style>
 </head>
 <body>
-   <a href="main.html" class="top-button">Back to Hub</a>
-  <h1>Memory Card Game</h1>
-  <div class="grid" id="grid"></div>
+    <a href="main.html" class="top-button">Back to Hub</a>
+    <h1>Memory Card Game</h1>
 
-  <script>
-    const emojis = ['🍎', '🍕', '🚀', '🐱', '🎮', '⚽', '🎲', '🎧'];
-    let cards = [...emojis, ...emojis]; // 16 total cards
-    let flippedCards = [];
-    let matchedCount = 0;
+    <div id="difficulty-screen">
+        <p>Choose a difficulty to start:</p>
+        <button class="diff-btn btn-easy" onclick="startGame('easy')">
+            <div class="diff-label">Easy</div>
+            <div class="diff-desc">8 cards · 4 pairs</div>
+        </button>
+        <button class="diff-btn btn-medium" onclick="startGame('medium')">
+            <div class="diff-label">Medium</div>
+            <div class="diff-desc">16 cards · 8 pairs</div>
+        </button>
+        <button class="diff-btn btn-hard" onclick="startGame('hard')">
+            <div class="diff-label">Hard</div>
+            <div class="diff-desc">24 cards · 12 pairs</div>
+        </button>
+        <button class="diff-btn btn-impossible" onclick="startGame('impossible')">
+            <div class="diff-label">Impossible</div>
+            <div class="diff-desc">40 cards · 20 pairs</div>
+        </button>
+    </div>
 
-    function shuffle(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
+    <div id="game-screen">
+        <div class="game-info">
+            <span id="badge-wrap"></span>
+            <span>Moves: <strong id="move-count">0</strong></span>
+            <span>Pairs: <strong id="pair-count">0</strong> / <strong id="pair-total">0</strong></span>
+        </div>
+        <div class="grid" id="grid"></div>
+        <button class="restart-btn" onclick="backToMenu()">🔁 Change Difficulty</button>
+    </div>
 
-    function createCard(emoji) {
-      const card = document.createElement('div');
-      card.classList.add('card');
-      card.dataset.emoji = emoji;
-      card.textContent = '';
-
-      card.addEventListener('click', () => {
-        if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
-        if (flippedCards.length === 2) return;
-
-        card.classList.add('flipped');
-        card.textContent = emoji;
-        flippedCards.push(card);
-
-        if (flippedCards.length === 2) {
-          const [first, second] = flippedCards;
-          if (first.dataset.emoji === second.dataset.emoji) {
-            first.classList.add('matched');
-            second.classList.add('matched');
-            matchedCount += 2;
-            flippedCards = [];
-
-            if (matchedCount === cards.length) {
-              setTimeout(() => {
-                location.reload();
-              }, 1000);
+    <script>
+        const DIFFICULTIES = {
+            easy: {
+                emojis: ['🍎','🍕','🚀','🐱'],
+                cols: 4,
+                label: 'Easy',
+                badgeClass: 'badge-easy',
+                smallCards: false
+            },
+            medium: {
+                emojis: ['🍎','🍕','🚀','🐱','🎮','⚽','🎲','🎧'],
+                cols: 4,
+                label: 'Medium',
+                badgeClass: 'badge-medium',
+                smallCards: false
+            },
+            hard: {
+                emojis: ['🍎','🍕','🚀','🐱','🎮','⚽','🎲','🎧','🦊','🌸','🍦','🔥'],
+                cols: 6,
+                label: 'Hard',
+                badgeClass: 'badge-hard',
+                smallCards: false
+            },
+            impossible: {
+                emojis: ['🍎','🍕','🚀','🐱','🎮','⚽','🎲','🎧','🦊','🌸','🍦','🔥',
+                         '🦋','🐸','🍓','🧊','🎃','🌈','🦄','🐙'],
+                cols: 8,
+                label: 'Impossible',
+                badgeClass: 'badge-impossible',
+                smallCards: true
             }
-          } else {
-            setTimeout(() => {
-              first.classList.remove('flipped');
-              second.classList.remove('flipped');
-              first.textContent = '';
-              second.textContent = '';
-              flippedCards = [];
-            }, 500);
-          }
+        };
+
+        let flippedCards = [];
+        let matchedCount = 0;
+        let totalPairs = 0;
+        let moves = 0;
+        let locked = false;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         }
-      });
 
-      return card;
-    }
+        function startGame(level) {
+            const config = DIFFICULTIES[level];
+            const cards = shuffle([...config.emojis, ...config.emojis]);
+            totalPairs = config.emojis.length;
+            matchedCount = 0;
+            moves = 0;
+            flippedCards = [];
+            locked = false;
 
-    const grid = document.getElementById('grid');
-    shuffle(cards).forEach(emoji => {
-      grid.appendChild(createCard(emoji));
-    });
-  </script>
+            document.getElementById('difficulty-screen').style.display = 'none';
+            const gameScreen = document.getElementById('game-screen');
+            gameScreen.style.display = 'flex';
+
+            document.getElementById('move-count').textContent = '0';
+            document.getElementById('pair-count').textContent = '0';
+            document.getElementById('pair-total').textContent = totalPairs;
+
+            document.getElementById('badge-wrap').innerHTML =
+                `<span class="difficulty-badge ${config.badgeClass}">${config.label}</span>`;
+
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            const cardSize = config.smallCards ? '52px' : '70px';
+            grid.style.gridTemplateColumns = `repeat(${config.cols}, ${cardSize})`;
+
+            cards.forEach(emoji => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                if (config.smallCards) card.classList.add('small');
+                card.dataset.emoji = emoji;
+                card.textContent = '';
+
+                card.addEventListener('click', () => {
+                    if (locked) return;
+                    if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+                    if (flippedCards.length === 2) return;
+
+                    card.classList.add('flipped');
+                    card.textContent = emoji;
+                    flippedCards.push(card);
+
+                    if (flippedCards.length === 2) {
+                        moves++;
+                        document.getElementById('move-count').textContent = moves;
+                        const [first, second] = flippedCards;
+
+                        if (first.dataset.emoji === second.dataset.emoji) {
+                            first.classList.add('matched');
+                            second.classList.add('matched');
+                            matchedCount++;
+                            document.getElementById('pair-count').textContent = matchedCount;
+                            flippedCards = [];
+
+                            if (matchedCount === totalPairs) {
+                                setTimeout(() => {
+                                    alert(`🎉 You won in ${moves} moves!`);
+                                    backToMenu();
+                                }, 500);
+                            }
+                        } else {
+                            locked = true;
+                            setTimeout(() => {
+                                first.classList.remove('flipped');
+                                second.classList.remove('flipped');
+                                first.textContent = '';
+                                second.textContent = '';
+                                flippedCards = [];
+                                locked = false;
+                            }, 700);
+                        }
+                    }
+                });
+
+                grid.appendChild(card);
+            });
+        }
+
+        function backToMenu() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('difficulty-screen').style.display = 'flex';
+        }
+    </script>
 </body>
 </html>
